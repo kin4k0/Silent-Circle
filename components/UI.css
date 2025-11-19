@@ -1,0 +1,110 @@
+/* 全体のコンテナ */
+.container {
+  width: 100%;
+  max-width: 400px; /* スマホ画面を想定 */
+  margin: 0 auto;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: #f9f9f9;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* スクロールはmain部分で */
+}
+
+/* ヘッダー */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid #eee;
+  background: #fff;
+  flex-shrink: 0; /* ヘッダーの高さを固定 */
+}
+
+.title {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.declareButton {
+  font-size: 12px;
+  font-weight: bold;
+  color: #007aff; /* iOSの標準的なリンク色 */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+/* タイムライン本体 (スクロール領域) */
+.timeline {
+  padding: 16px;
+  overflow-y: auto; /* 宣言が増えたらスクロール */
+  flex-grow: 1; /* 残りの高さいっぱいを使う */
+}
+
+/* 宣言のチャットバブル (図4のデザイン) */
+.postBubble {
+  position: relative;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 16px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  /* チャットバブルの「しっぽ」 (CSSで簡易的に作成) */
+  &:before {
+    content: "";
+    position: absolute;
+    bottom: 10px;
+    left: -8px;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid #ddd; /* 枠線と同じ色 */
+  }
+  &:after {
+    content: "";
+    position: absolute;
+    bottom: 11px;
+    left: -6px;
+    width: 0;
+    height: 0;
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+    border-right: 7px solid #fff; /* 背景と同じ色 */
+  }
+}
+
+.postBubble p {
+  margin: 0;
+  font-size: 16px;
+  /* 拍手ボタンと重ならないように右側に余白 */
+  padding-right: 40px; 
+}
+
+/* 拍手ボタン (図4の右下にあるアイコン) */
+.clapButton {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: transform 0.1s ease;
+
+  /* ユーザーが用意する画像をここに配置 */
+  clap.png { width: 24px; height: 24px; } 
+  
+  /* 仮の絵文字スタイル */
+  font-size: 20px;
+}
+
+.clapButton:active {
+  transform: scale(1.2); /* クリック時に少し拡大 */
+}

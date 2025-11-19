@@ -1,0 +1,74 @@
+/* 全体のコンテナ */
+.container {
+  width: 100%;
+  max-width: 400px; /* スマホ画面を想定 */
+  margin: 0 auto;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: #f9f9f9;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ヘッダー */
+.header {
+  padding: 10px 16px;
+  border-bottom: 1px solid #eee;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.backButton {
+  font-size: 24px; /* 矢印を大きく */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: #007aff;
+}
+
+/* フォームラッパー */
+.formWrapper {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* テキスト入力エリア (図5のデザイン) [cite: 64] */
+.textarea {
+  width: 100%;
+  height: 150px; /* 適切な高さに設定 */
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  resize: none; /* ユーザーによるサイズ変更を禁止 */
+  box-sizing: border-box; /* paddingを含めてwidth 100%にする */
+  margin-bottom: 20px;
+}
+
+/* 宣言するボタン (図5のデザイン) [cite: 65] */
+.submitButton {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  background-color: #007aff; /* メインカラー */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submitButton:hover {
+  background-color: #0056b3;
+}
+
+/* テキストが空で押せない時のスタイル */
+.submitButton:disabled {
+  background-color: #c0c0c0; /* グレーアウト */
+  cursor: not-allowed;
+}
