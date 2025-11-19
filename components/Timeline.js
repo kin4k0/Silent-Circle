@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, increment } from "firebase/firestore";
-import { db } from "../lib/firebase";
+// ★変更点: deleteDoc を追加
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, increment, deleteDoc } from "firebase/firestore";
+// ★変更点: auth を追加
+import { db, auth } from "../lib/firebase";
 import styles from './Timeline.module.css';
 
 export default function Timeline({ onDeclareClick }) {
   const [posts, setPosts] = useState([]);
-  // 追加1: 自分が「拍手」した投稿のIDリストを管理する変数
   const [likedPostIds, setLikedPostIds] = useState([]);
 
   useEffect(() => {
-    // 追加2: 画面を開いたとき、ブラウザに保存された「拍手済みリスト」を読み込む
     const savedLikes = JSON.parse(localStorage.getItem('likedPostIds') || '[]');
     setLikedPostIds(savedLikes);
 
@@ -25,23 +25,37 @@ export default function Timeline({ onDeclareClick }) {
     return () => unsubscribe();
   }, []);
 
+  // 拍手機能
   const handleClap = async (id) => {
-    // 追加3: すでにリストに入っていたら、処理を中断する（これ以上押せない）
-    if (likedPostIds.includes(id)) {
-      return; 
-    }
+    if (likedPostIds.includes(id)) return; 
 
-    // DB更新
     const postRef = doc(db, "posts", id);
     await updateDoc(postRef, {
       claps: increment(1)
     });
 
-    // 追加4: 押したIDをリストに追加して、ブラウザ(LocalStorage)に保存
     const newLikedList = [...likedPostIds, id];
     setLikedPostIds(newLikedList);
     localStorage.setItem('likedPostIds', JSON.stringify(newLikedList));
   };
+
+  // ★変更点: 削除機能を追加
+  const handleDelete = async (e, id) => {
+    e.stopPropagation(); // 拍手ボタンなどが反応しないようにする
+    
+    const confirmDelete = window.confirm("本当にこの宣言を削除しますか？");
+    if (!confirmDelete) return;
+
+    try {
+      await deleteDoc(doc(db, "posts", id));
+    } catch (error) {
+      console.error("削除エラー:", error);
+      alert("削除できませんでした。自分の投稿以外は消せません。");
+    }
+  };
+
+  // 現在のユーザーIDを取得（ログインしていない場合は undefined になる）
+  const currentUserId = auth.currentUser?.uid;
 
   return (
     <div className={styles.container}>
@@ -60,22 +74,44 @@ export default function Timeline({ onDeclareClick }) {
         )}
 
         {posts.map((post) => {
-          // 追加5: この投稿に既に拍手したかどうか判定
           const isLiked = likedPostIds.includes(post.id);
+          
+          // ★変更点: この投稿は自分のものか判定する
+          const isMyPost = currentUserId && post.uid === currentUserId;
 
           return (
             <div key={post.id} className={styles.postBubble}>
               <p>{post.text}</p>
               
+              {/* ★変更点: 自分の投稿(isMyPost)なら削除ボタンを表示 */}
+              {isMyPost && (
+                <button 
+                  onClick={(e) => handleDelete(e, post.id)}
+                  style={{
+                    position: 'absolute',
+                    top: '5px',
+                    right: '10px',
+                    background: 'none',
+                    border: 'none',
+                    color: '#999',
+                    fontSize: '18px',
+                    cursor: 'pointer',
+                    padding: '0 5px',
+                    lineHeight: '1',
+                  }}
+                >
+                  ×
+                </button>
+              )}
+
               {/* 拍手ボタン */}
               <div 
                 className={styles.clapButton} 
                 onClick={() => handleClap(post.id)}
-                // 追加6: 拍手済みなら薄くして、カーソルも変える
                 style={{ 
                   opacity: isLiked ? 0.5 : 1, 
                   cursor: isLiked ? 'default' : 'pointer',
-                  pointerEvents: isLiked ? 'none' : 'auto' // CSSでもクリック禁止
+                  pointerEvents: isLiked ? 'none' : 'auto'
                 }}
               >
                 <span>👏</span>

@@ -1,12 +1,13 @@
 // components/NewPostForm.js
 import React, { useState } from 'react';
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "../lib/firebase"; // 設定ファイル読み込み
+// ★変更点: auth も読み込む
+import { db, auth } from "../lib/firebase"; 
 import styles from './NewPostForm.module.css';
 
 export default function NewPostForm({ onBackClick }) {
   const [text, setText] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false); // 二重送信防止用
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,18 +15,20 @@ export default function NewPostForm({ onBackClick }) {
     if (!text.trim() || isSubmitting) return;
 
     try {
-      setIsSubmitting(true); // 送信中はボタンを押せなくする
+      setIsSubmitting(true);
 
       // Firestoreの "posts" コレクションにデータを追加
       await addDoc(collection(db, "posts"), {
         text: text,
-        claps: 0, // 最初は0
-        createdAt: serverTimestamp(), // サーバー側の日時を自動記録
+        claps: 0,
+        createdAt: serverTimestamp(),
+        // ★変更点: 「誰が書いたか(uid)」を一緒に保存する
+        uid: auth.currentUser ? auth.currentUser.uid : null, 
       });
 
       // 送信成功
       setText('');
-      onBackClick(); // タイムラインに戻る
+      onBackClick();
 
     } catch (error) {
       console.error("Error adding document: ", error);
