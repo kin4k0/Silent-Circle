@@ -49,7 +49,7 @@ export default function NewPostForm({ onBackClick }) {
             className={styles.textarea}
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="隣町まで10分で行けるように&#10;頑張って走る!!"
+            placeholder="宣言しよう！"
           />
           
           <button 
