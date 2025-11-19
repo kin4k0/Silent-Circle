@@ -1,18 +1,19 @@
-// components/Timeline.js
 import { useEffect, useState } from 'react';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, increment } from "firebase/firestore";
-import { db } from "../lib/firebase"; // さっき作った設定ファイルを読み込み
+import { db } from "../lib/firebase";
 import styles from './Timeline.module.css';
 
 export default function Timeline({ onDeclareClick }) {
   const [posts, setPosts] = useState([]);
+  // 追加1: 自分が「拍手」した投稿のIDリストを管理する変数
+  const [likedPostIds, setLikedPostIds] = useState([]);
 
-  // 1. 画面が表示されたら、Firestoreのデータを監視する
   useEffect(() => {
-    // "posts" というコレクションを、新しい順(createdAtの降順)で取得するクエリ
-    const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+    // 追加2: 画面を開いたとき、ブラウザに保存された「拍手済みリスト」を読み込む
+    const savedLikes = JSON.parse(localStorage.getItem('likedPostIds') || '[]');
+    setLikedPostIds(savedLikes);
 
-    // リアルタイムリスナー: 誰かが投稿したり拍手すると、即座にここが動く
+    const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const postsData = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -21,19 +22,25 @@ export default function Timeline({ onDeclareClick }) {
       setPosts(postsData);
     });
 
-    // 画面を閉じる時は監視を終了する
     return () => unsubscribe();
   }, []);
 
-  // 2. 拍手ボタンが押された時の処理
   const handleClap = async (id) => {
+    // 追加3: すでにリストに入っていたら、処理を中断する（これ以上押せない）
+    if (likedPostIds.includes(id)) {
+      return; 
+    }
+
+    // DB更新
     const postRef = doc(db, "posts", id);
-    // データベースの claps の数字を +1 する
     await updateDoc(postRef, {
       claps: increment(1)
     });
-    // ※React側でstateを変える必要はありません。
-    //  DBが更新されると、上のonSnapshotが自動で検知して画面を書き換えてくれます。
+
+    // 追加4: 押したIDをリストに追加して、ブラウザ(LocalStorage)に保存
+    const newLikedList = [...likedPostIds, id];
+    setLikedPostIds(newLikedList);
+    localStorage.setItem('likedPostIds', JSON.stringify(newLikedList));
   };
 
   return (
@@ -46,30 +53,39 @@ export default function Timeline({ onDeclareClick }) {
       </header>
 
       <main className={styles.timeline}>
-        {/* 投稿がない場合のメッセージ */}
         {posts.length === 0 && (
           <p style={{textAlign: 'center', padding: '20px', color: '#999'}}>
             まだ宣言はありません。<br/>一番乗りで宣言しましょう！
           </p>
         )}
 
-        {posts.map((post) => (
-          <div key={post.id} className={styles.postBubble}>
-            <p>{post.text}</p>
-            
-            {/* 拍手ボタン */}
-            <div 
-              className={styles.clapButton} 
-              onClick={() => handleClap(post.id)}
-            >
-              <span>👏</span>
-              {/* 確認用に今の拍手数も小さく表示しておきます */}
-              <span style={{fontSize: '10px', marginLeft: '4px'}}>
-                {post.claps || 0}
-              </span>
+        {posts.map((post) => {
+          // 追加5: この投稿に既に拍手したかどうか判定
+          const isLiked = likedPostIds.includes(post.id);
+
+          return (
+            <div key={post.id} className={styles.postBubble}>
+              <p>{post.text}</p>
+              
+              {/* 拍手ボタン */}
+              <div 
+                className={styles.clapButton} 
+                onClick={() => handleClap(post.id)}
+                // 追加6: 拍手済みなら薄くして、カーソルも変える
+                style={{ 
+                  opacity: isLiked ? 0.5 : 1, 
+                  cursor: isLiked ? 'default' : 'pointer',
+                  pointerEvents: isLiked ? 'none' : 'auto' // CSSでもクリック禁止
+                }}
+              >
+                <span>👏</span>
+                <span style={{fontSize: '10px', marginLeft: '4px'}}>
+                  {post.claps || 0}
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </main>
     </div>
   );
