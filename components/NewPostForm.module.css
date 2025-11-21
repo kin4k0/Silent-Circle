@@ -1,26 +1,30 @@
 /* 全体のコンテナ */
 .container {
   width: 100%;
-  /* Timelineと同じ幅に合わせる */
-  max-width: 600px; 
+  max-width: 800px; 
   margin: 0 auto;
-  background: #f9f9f9;
-  
-  /* 画面の高さいっぱいに広げる */
   min-height: 100vh;
+  
+  /* 変数を適用 */
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--font-family);
   
   display: flex;
   flex-direction: column;
   
-  border-left: 1px solid #eee;
-  border-right: 1px solid #eee;
+  border-left: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  
+  transition: background 0.3s, color 0.3s;
 }
 
 /* ヘッダー */
 .header {
-  padding: 10px 16px;
-  border-bottom: 1px solid #eee;
-  background: #fff;
+  padding: 15px 24px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-color);
   flex-shrink: 0;
 }
 
@@ -29,55 +33,82 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0;
-  color: #007aff;
+  padding: 4px;
+  color: var(--text-color); 
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+}
+.backButton:hover {
+  background-color: rgba(128,128,128, 0.1);
 }
 
 /* フォームラッパー */
 .formWrapper {
-  padding: 16px;
+  padding: 30px; 
   display: flex;
   flex-direction: column;
   height: 100%;
+  background-color: var(--bg-color);
 }
 
 /* テキスト入力エリア */
 .textarea {
   width: 100%;
-  height: 200px; /* 少し高さを広げました */
-  padding: 12px;
-  font-size: 16px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
+  height: 300px; 
+  padding: 20px;
+  
+  font-size: var(--font-size-base);
+  color: var(--text-color);
+  background: var(--bubble-bg);
+  border: 1px solid var(--border-color);
+  
+  border-radius: 12px;
   resize: none;
   box-sizing: border-box;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   outline: none;
+  line-height: 1.6;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+  
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
 }
 
 .textarea:focus {
-  border-color: #007aff; /* 入力中に青く光る */
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
 }
 
 /* 宣言するボタン */
 .submitButton {
   width: 100%;
-  padding: 12px;
-  font-size: 16px;
+  max-width: 300px; 
+  
+  /* ★変更点: 中央寄せ(margin: 0 auto)をやめて、右寄せにする */
+  margin-left: auto; 
+  margin-right: 0;
+  
+  padding: 16px;
+  
+  font-size: var(--font-size-base); 
   font-weight: bold;
   color: white;
-  background-color: #007aff;
+  background-color: var(--accent-color);
   border: none;
-  border-radius: 8px;
+  border-radius: 30px; 
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, transform 0.1s;
+  box-shadow: 0 4px 10px rgba(0, 122, 255, 0.2);
 }
 
 .submitButton:hover {
-  background-color: #0056b3;
+  filter: brightness(0.9);
+  transform: translateY(-2px);
 }
 
 .submitButton:disabled {
-  background-color: #c0c0c0;
+  background-color: #ccc;
+  box-shadow: none;
   cursor: not-allowed;
+  transform: none;
+  filter: none;
 }

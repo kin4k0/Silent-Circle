@@ -1,21 +1,22 @@
 /* 全体のコンテナ */
 .container {
   width: 100%;
-  /* PCで見やすい幅に広げる (Twitter/Xのようなサイズ感) */
-  max-width: 600px; 
+  max-width: 800px;
   margin: 0 auto;
-  background: #f9f9f9;
-  
-  /* 画面の高さいっぱいに広げる */
   min-height: 100vh;
+  
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--font-family);
   
   display: flex;
   flex-direction: column;
   overflow: hidden; 
+  border-left: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
   
-  /* 画面全体になじませるため、外枠の線を消す */
-  border-left: 1px solid #eee;
-  border-right: 1px solid #eee;
+  transition: background 0.3s, color 0.3s;
 }
 
 /* ヘッダー */
@@ -23,34 +24,35 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 16px;
-  border-bottom: 1px solid #eee;
-  background: #fff;
+  padding: 15px 24px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-color);
   flex-shrink: 0;
-  
-  /* スクロールしても上に固定する場合（お好みで有効化してください） */
-  /* position: sticky; top: 0; z-index: 10; */
 }
 
 .title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   margin: 0;
 }
 
 .declareButton {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: bold;
-  color: #007aff;
+  color: var(--accent-color);
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+.declareButton:hover {
+  background-color: rgba(0,0,0,0.05);
 }
 
 /* タイムライン本体 */
 .timeline {
-  padding: 16px;
+  padding: 24px;
   overflow-y: auto;
   flex-grow: 1;
 }
@@ -58,59 +60,76 @@
 /* 宣言の吹き出し */
 .postBubble {
   position: relative;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 16px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background: var(--bubble-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
-/* 吹き出しのしっぽ */
 .postBubble::before {
   content: "";
   position: absolute;
-  bottom: 10px;
-  left: -8px;
-  width: 0;
-  height: 0;
-  border-top: 8px solid transparent;
-  border-bottom: 8px solid transparent;
-  border-right: 8px solid #ddd;
+  bottom: 20px; left: -9px;
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  border-right: 9px solid var(--border-color);
 }
-
 .postBubble::after {
   content: "";
   position: absolute;
-  bottom: 11px;
-  left: -6px;
-  width: 0;
-  height: 0;
-  border-top: 7px solid transparent;
-  border-bottom: 7px solid transparent;
-  border-right: 7px solid #fff;
+  bottom: 21px; left: -7px;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 8px solid var(--bubble-bg);
 }
 
 .postBubble p {
   margin: 0;
-  font-size: 16px;
-  padding-right: 40px;
-  word-break: break-all; /* 長い文字の折り返し */
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  padding-right: 70px;
+  word-break: break-all;
+}
+
+/* 削除ボタン (ここを修正しました) */
+.deleteButton {
+  position: absolute;
+  top: 5px; right: 10px;
+  background: none; border: none;
+  color: #999; 
+  font-size: 18px; /* ← ここ修正 */
+  cursor: pointer;
+  padding: 0 5px; 
+  line-height: 1; /* ← ここ修正 */
 }
 
 /* 拍手ボタン */
 .clapButton {
-  position: absolute;
-  bottom: 8px;
-  right: 12px;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 50%;
-  transition: transform 0.1s ease;
-  font-size: 20px;
-  user-select: none; /* 連打時の選択防止 */
+  position: absolute; bottom: 12px; right: 16px;
+  cursor: pointer; padding: 6px 10px;
+  border-radius: 20px; transition: all 0.2s ease;
+  display: flex; align-items: center;
+  background-color: rgba(128, 128, 128, 0.1);
+  user-select: none;
 }
+.clapButton:active { transform: scale(0.95); }
 
-.clapButton:active {
-  transform: scale(1.2);
+/* 設定ボタン */
+.settingsButton {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  font-size: 24px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  transition: transform 0.2s;
 }
+.settingsButton:hover { transform: scale(1.1); }
