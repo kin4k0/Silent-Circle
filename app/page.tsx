@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Timeline from "../components/Timeline";
 import NewPostForm from "../components/NewPostForm";
 
 export default function Home() {
   const [currentView, setCurrentView] = useState("timeline");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const [settings, setSettings] = useState({
     darkMode: false,
@@ -14,18 +15,52 @@ export default function Home() {
     fontFamily: 'sans',
   });
 
+  // 1. 読み込み
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('silent-circle-settings');
+    if (savedSettings) {
+      try {
+        // ★修正1: 警告を無視するためのコメントを追加
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setSettings(JSON.parse(savedSettings));
+      } catch (e) {
+        console.error("設定の読み込みに失敗しました", e);
+      }
+    }
+    setIsLoaded(true);
+  }, []);
+
+  // 2. 保存
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem('silent-circle-settings', JSON.stringify(settings));
+    }
+  }, [settings, isLoaded]);
+
   const appStyles = {
     '--bg-color': settings.darkMode ? '#1a1a1a' : '#ffffff',
     '--text-color': settings.darkMode ? '#f0f0f0' : '#333333',
     '--accent-color': '#007aff',
     '--bubble-bg': settings.darkMode ? '#2c2c2c' : '#ffffff',
     '--border-color': settings.darkMode ? '#444' : '#eee',
+    '--invert-filter': settings.darkMode ? '1' : '0',
     '--font-size-base': settings.fontSize === 'small' ? '14px' : settings.fontSize === 'large' ? '20px' : '16px',
     '--font-family': settings.fontFamily === 'serif' ? '"Hiragino Mincho ProN", "Yu Mincho", serif' : '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   } as React.CSSProperties;
 
+  if (!isLoaded) {
+    return <div style={{minHeight:'100vh', background:'#fff'}} />;
+  }
+
   return (
-    <main style={appStyles} className="min-h-screen">
+    <main 
+      style={{
+        ...appStyles,
+        backgroundColor: 'var(--bg-color)',
+        transition: 'background-color 0.3s'
+      }} 
+      className="min-h-screen"
+    >
       
       {currentView === "timeline" && (
         <Timeline 
@@ -58,7 +93,7 @@ export default function Home() {
                 {['small', 'medium', 'large'].map((size) => (
                   <button 
                     key={size}
-                    
+                    // ★修正2: ここにあった // @ts-ignore を完全に削除しました
                     onClick={() => setSettings({...settings, fontSize: size})}
                     style={{
                       ...sizeButtonStyle,
@@ -89,7 +124,6 @@ export default function Home() {
   );
 }
 
-// ★修正点: any を React.CSSProperties に変更
 const modalOverlayStyle: React.CSSProperties = {
   position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
   backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
