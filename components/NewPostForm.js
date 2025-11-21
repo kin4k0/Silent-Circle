@@ -7,26 +7,36 @@ export default function NewPostForm({ onBackClick }) {
   const [text, setText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ★ここにお好きな禁止用語を追加してください
-  const NG_WORDS = ['死ね', '殺す', '馬鹿', 'あほ', 'うんこ'];
+  // ★ここが禁止用語リストです
+  // ひらがな、カタカナ、漢字など、ブロックしたい表記をすべて書いてください
+  const NG_WORDS = ['死ね', '殺す', '馬鹿', 'ばか', 'バカ', 'あほ', 'うんこ'];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!text.trim() || isSubmitting) return;
+    // 入力チェック
+    if (!text.trim()) return;
+    if (isSubmitting) return;
 
-    // ★追加: 禁止用語チェック
-    // 「入力されたテキスト」の中に「NGワード」が含まれているか探す
-    const hasNgWord = NG_WORDS.some(word => text.includes(word));
+    // ★デバッグ用: コンソールにチェック内容を表示
+    console.log("入力された文字:", text);
+    
+    // 禁止用語チェック
+    const foundNgWord = NG_WORDS.find(word => text.includes(word));
 
-    if (hasNgWord) {
-      alert("不適切な言葉が含まれているため、投稿できません。");
-      return; // ここで処理をストップ（投稿させない）
+    if (foundNgWord) {
+      // 禁止用語が見つかった場合
+      console.log("禁止用語を検出しました:", foundNgWord);
+      alert(`不適切な言葉が含まれています: 「${foundNgWord}」`);
+      return; // ★ここで強制終了（送信させない）
     }
+
+    console.log("禁止用語はありませんでした。送信を開始します。");
 
     try {
       setIsSubmitting(true);
 
+      // Firebaseへの送信処理
       await addDoc(collection(db, "posts"), {
         text: text,
         claps: 0,
@@ -34,12 +44,13 @@ export default function NewPostForm({ onBackClick }) {
         uid: auth.currentUser ? auth.currentUser.uid : null, 
       });
 
+      console.log("送信成功！");
       setText('');
       onBackClick();
 
     } catch (error) {
-      console.error("Error adding document: ", error);
-      alert("送信に失敗しました。通信環境を確認してください。");
+      console.error("送信エラー:", error);
+      alert("送信に失敗しました。");
     } finally {
       setIsSubmitting(false);
     }
