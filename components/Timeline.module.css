@@ -133,3 +133,6 @@
   transition: transform 0.2s;
 }
 .settingsButton:hover { transform: scale(1.1); }
+:global(main[style*="--bg-color: #1a1a1a"]) .clapButton img {
+  filter: invert(1);
+}
