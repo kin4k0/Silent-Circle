@@ -38,7 +38,7 @@ export default function Home() {
 
   const appStyles = {
     // ★変更点: ライトモードの背景色を薄いグレー(#f0f2f5)にして、白い吹き出しを見やすくする
-    '--bg-color': settings.darkMode ? '#1a1a1a' : '#e3e4e6',
+    '--bg-color': settings.darkMode ? '#1a1a1a' : '#dedede',
     
     '--text-color': settings.darkMode ? '#f0f0f0' : '#333333',
     '--accent-color': '#007aff',
