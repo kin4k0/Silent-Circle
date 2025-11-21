@@ -15,7 +15,7 @@ export default function Home() {
     fontFamily: 'sans',
   });
 
-  // 1. 読み込み
+  // 1. 設定の読み込み
   useEffect(() => {
     const savedSettings = localStorage.getItem('silent-circle-settings');
     if (savedSettings) {
@@ -29,7 +29,7 @@ export default function Home() {
     setIsLoaded(true);
   }, []);
 
-  // 2. 保存
+  // 2. 設定の保存
   useEffect(() => {
     if (isLoaded) {
       localStorage.setItem('silent-circle-settings', JSON.stringify(settings));
@@ -37,15 +37,15 @@ export default function Home() {
   }, [settings, isLoaded]);
 
   const appStyles = {
-    // ★変更点: ライトモードの背景色を薄いグレー(#f0f2f5)にして、白い吹き出しを見やすくする
-    '--bg-color': settings.darkMode ? '#1a1a1a' : '#dedede',
+    // ★変更点: 背景を「#fafafa (ほぼ白)」にして明るく清潔感アップ
+    '--bg-color': settings.darkMode ? '#1a1a1a' : '#fafafa',
     
     '--text-color': settings.darkMode ? '#f0f0f0' : '#333333',
     '--accent-color': '#007aff',
     '--bubble-bg': settings.darkMode ? '#2c2c2c' : '#ffffff',
     
-    // ★変更点: 枠線の色を少し濃くして境界をはっきりさせる
-    '--border-color': settings.darkMode ? '#444' : '#0d0d0d',
+    // ★変更点: 枠線を「#e5e5e5」にして薄く目立たなくする
+    '--border-color': settings.darkMode ? '#444' : '#e5e5e5',
     
     '--invert-filter': settings.darkMode ? '1' : '0',
     '--font-size-base': settings.fontSize === 'small' ? '14px' : settings.fontSize === 'large' ? '20px' : '16px',
