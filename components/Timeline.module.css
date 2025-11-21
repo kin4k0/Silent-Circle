@@ -1,15 +1,21 @@
 /* 全体のコンテナ */
 .container {
   width: 100%;
-  max-width: 400px; /* スマホ画面を想定 */
+  /* PCで見やすい幅に広げる (Twitter/Xのようなサイズ感) */
+  max-width: 600px; 
   margin: 0 auto;
-  border: 1px solid #ccc;
-  border-radius: 10px;
   background: #f9f9f9;
-  height: 80vh;
+  
+  /* 画面の高さいっぱいに広げる */
+  min-height: 100vh;
+  
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* スクロールはmain部分で */
+  overflow: hidden; 
+  
+  /* 画面全体になじませるため、外枠の線を消す */
+  border-left: 1px solid #eee;
+  border-right: 1px solid #eee;
 }
 
 /* ヘッダー */
@@ -20,7 +26,10 @@
   padding: 10px 16px;
   border-bottom: 1px solid #eee;
   background: #fff;
-  flex-shrink: 0; /* ヘッダーの高さを固定 */
+  flex-shrink: 0;
+  
+  /* スクロールしても上に固定する場合（お好みで有効化してください） */
+  /* position: sticky; top: 0; z-index: 10; */
 }
 
 .title {
@@ -32,21 +41,21 @@
 .declareButton {
   font-size: 12px;
   font-weight: bold;
-  color: #007aff; /* iOSの標準的なリンク色 */
+  color: #007aff;
   background: none;
   border: none;
   cursor: pointer;
   padding: 4px 8px;
 }
 
-/* タイムライン本体 (スクロール領域) */
+/* タイムライン本体 */
 .timeline {
   padding: 16px;
-  overflow-y: auto; /* 宣言が増えたらスクロール */
-  flex-grow: 1; /* 残りの高さいっぱいを使う */
+  overflow-y: auto;
+  flex-grow: 1;
 }
 
-/* 宣言のチャットバブル (図4のデザイン) */
+/* 宣言の吹き出し */
 .postBubble {
   position: relative;
   background: #fff;
@@ -55,40 +64,41 @@
   padding: 12px 16px;
   margin-bottom: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
 
-  /* チャットバブルの「しっぽ」 (CSSで簡易的に作成) */
-  &:before {
-    content: "";
-    position: absolute;
-    bottom: 10px;
-    left: -8px;
-    width: 0;
-    height: 0;
-    border-top: 8px solid transparent;
-    border-bottom: 8px solid transparent;
-    border-right: 8px solid #ddd; /* 枠線と同じ色 */
-  }
-  &:after {
-    content: "";
-    position: absolute;
-    bottom: 11px;
-    left: -6px;
-    width: 0;
-    height: 0;
-    border-top: 7px solid transparent;
-    border-bottom: 7px solid transparent;
-    border-right: 7px solid #fff; /* 背景と同じ色 */
-  }
+/* 吹き出しのしっぽ */
+.postBubble::before {
+  content: "";
+  position: absolute;
+  bottom: 10px;
+  left: -8px;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 8px solid #ddd;
+}
+
+.postBubble::after {
+  content: "";
+  position: absolute;
+  bottom: 11px;
+  left: -6px;
+  width: 0;
+  height: 0;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-right: 7px solid #fff;
 }
 
 .postBubble p {
   margin: 0;
   font-size: 16px;
-  /* 拍手ボタンと重ならないように右側に余白 */
-  padding-right: 40px; 
+  padding-right: 40px;
+  word-break: break-all; /* 長い文字の折り返し */
 }
 
-/* 拍手ボタン (図4の右下にあるアイコン) */
+/* 拍手ボタン */
 .clapButton {
   position: absolute;
   bottom: 8px;
@@ -97,14 +107,10 @@
   padding: 4px;
   border-radius: 50%;
   transition: transform 0.1s ease;
-
-  /* ユーザーが用意する画像をここに配置 */
-  clap.png { width: 24px; height: 24px; } 
-  
-  /* 仮の絵文字スタイル */
   font-size: 20px;
+  user-select: none; /* 連打時の選択防止 */
 }
 
 .clapButton:active {
-  transform: scale(1.2); /* クリック時に少し拡大 */
+  transform: scale(1.2);
 }
