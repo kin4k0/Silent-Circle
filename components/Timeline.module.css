@@ -5,6 +5,7 @@
   margin: 0 auto;
   min-height: 100vh;
   
+  /* ★修正点: ここが #fff になっていたのを変数に戻します */
   background: var(--bg-color);
   color: var(--text-color);
   font-family: var(--font-family);
@@ -55,6 +56,8 @@
   padding: 24px;
   overflow-y: auto;
   flex-grow: 1;
+  /* ここは透明にして親(container)の色を使う */
+  background-color: transparent; 
 }
 
 /* 宣言の吹き出し */
@@ -82,7 +85,7 @@
   bottom: 21px; left: -7px;
   border-top: 8px solid transparent;
   border-bottom: 8px solid transparent;
-  border-right: 8px solid var(--bubble-bg);
+  border-right: 9px solid var(--bubble-bg);
 }
 
 .postBubble p {
@@ -93,16 +96,16 @@
   word-break: break-all;
 }
 
-/* 削除ボタン (ここを修正しました) */
+/* 削除ボタン */
 .deleteButton {
   position: absolute;
   top: 5px; right: 10px;
   background: none; border: none;
   color: #999; 
-  font-size: 18px; /* ← ここ修正 */
+  font-size: 18px;
   cursor: pointer;
   padding: 0 5px; 
-  line-height: 1; /* ← ここ修正 */
+  line-height: 1;
 }
 
 /* 拍手ボタン */
@@ -113,6 +116,10 @@
   display: flex; align-items: center;
   background-color: rgba(128, 128, 128, 0.1);
   user-select: none;
+}
+.clapButton img {
+  filter: invert(var(--invert-filter));
+  transition: filter 0.3s;
 }
 .clapButton:active { transform: scale(0.95); }
 
@@ -133,6 +140,3 @@
   transition: transform 0.2s;
 }
 .settingsButton:hover { transform: scale(1.1); }
-:global(main[style*="--bg-color: #1a1a1a"]) .clapButton img {
-  filter: invert(1);
-}

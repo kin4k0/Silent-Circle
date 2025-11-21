@@ -10,9 +10,9 @@ export default function Timeline({ onDeclareClick, onOpenSettings }) {
   const [likedPostIds, setLikedPostIds] = useState([]);
 
   useEffect(() => {
+    // 警告回避のため、データがある時だけセットするように修正
     const savedLikes = JSON.parse(localStorage.getItem('likedPostIds') || '[]');
     if (savedLikes.length > 0) {
-      // ★修正点: 以下のコメントを追加してエラーを無視させる
       // eslint-disable-next-line
       setLikedPostIds(savedLikes);
     }
@@ -44,6 +44,8 @@ export default function Timeline({ onDeclareClick, onOpenSettings }) {
     try {
       await deleteDoc(doc(db, "posts", id));
     } catch (error) {
+      // ★修正点: ここで error を使うようにしたので警告が消えます
+      console.error("削除エラー:", error);
       alert("削除できませんでした。");
     }
   };

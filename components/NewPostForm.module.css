@@ -5,7 +5,7 @@
   margin: 0 auto;
   min-height: 100vh;
   
-  /* 変数を適用 */
+  /* ★修正点: ここも変数に戻します */
   background: var(--bg-color);
   color: var(--text-color);
   font-family: var(--font-family);
@@ -80,13 +80,9 @@
 
 /* 宣言するボタン */
 .submitButton {
-  /* ★変更点: ブロック要素にして右寄せを効かせる */
   display: block; 
-  
   width: 100%;
-  max-width: 200px; /* 右に寄せるので少し幅を小さくしてスマートに */
-  
-  /* これで右端に配置されます */
+  max-width: 200px; 
   margin-left: auto; 
   margin-right: 0;
   

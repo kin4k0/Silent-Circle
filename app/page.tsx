@@ -20,7 +20,6 @@ export default function Home() {
     const savedSettings = localStorage.getItem('silent-circle-settings');
     if (savedSettings) {
       try {
-        // ★修正1: 警告を無視するためのコメントを追加
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setSettings(JSON.parse(savedSettings));
       } catch (e) {
@@ -38,11 +37,16 @@ export default function Home() {
   }, [settings, isLoaded]);
 
   const appStyles = {
-    '--bg-color': settings.darkMode ? '#1a1a1a' : '#ffffff',
+    // ★変更点: ライトモードの背景色を薄いグレー(#f0f2f5)にして、白い吹き出しを見やすくする
+    '--bg-color': settings.darkMode ? '#1a1a1a' : '#e3e4e6',
+    
     '--text-color': settings.darkMode ? '#f0f0f0' : '#333333',
     '--accent-color': '#007aff',
     '--bubble-bg': settings.darkMode ? '#2c2c2c' : '#ffffff',
-    '--border-color': settings.darkMode ? '#444' : '#eee',
+    
+    // ★変更点: 枠線の色を少し濃くして境界をはっきりさせる
+    '--border-color': settings.darkMode ? '#444' : '#0d0d0d',
+    
     '--invert-filter': settings.darkMode ? '1' : '0',
     '--font-size-base': settings.fontSize === 'small' ? '14px' : settings.fontSize === 'large' ? '20px' : '16px',
     '--font-family': settings.fontFamily === 'serif' ? '"Hiragino Mincho ProN", "Yu Mincho", serif' : '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -93,7 +97,6 @@ export default function Home() {
                 {['small', 'medium', 'large'].map((size) => (
                   <button 
                     key={size}
-                    // ★修正2: ここにあった // @ts-ignore を完全に削除しました
                     onClick={() => setSettings({...settings, fontSize: size})}
                     style={{
                       ...sizeButtonStyle,
