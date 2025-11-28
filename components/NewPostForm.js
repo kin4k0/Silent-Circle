@@ -7,36 +7,28 @@ export default function NewPostForm({ onBackClick }) {
   const [text, setText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ★ここが禁止用語リストです
-  // ひらがな、カタカナ、漢字など、ブロックしたい表記をすべて書いてください
+  // 文字数制限
+  const MAX_LENGTH = 300;
+
+  // 禁止用語リスト
   const NG_WORDS = ['死ね', '殺す', '馬鹿', 'ばか', 'バカ', 'あほ', 'うんこ'];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // 入力チェック
     if (!text.trim()) return;
     if (isSubmitting) return;
 
-    // ★デバッグ用: コンソールにチェック内容を表示
-    console.log("入力された文字:", text);
-    
     // 禁止用語チェック
     const foundNgWord = NG_WORDS.find(word => text.includes(word));
-
     if (foundNgWord) {
-      // 禁止用語が見つかった場合
-      console.log("禁止用語を検出しました:", foundNgWord);
       alert(`不適切な言葉が含まれています: 「${foundNgWord}」`);
-      return; // ★ここで強制終了（送信させない）
+      return; 
     }
-
-    console.log("禁止用語はありませんでした。送信を開始します。");
 
     try {
       setIsSubmitting(true);
 
-      // Firebaseへの送信処理
       await addDoc(collection(db, "posts"), {
         text: text,
         claps: 0,
@@ -44,7 +36,6 @@ export default function NewPostForm({ onBackClick }) {
         uid: auth.currentUser ? auth.currentUser.uid : null, 
       });
 
-      console.log("送信成功！");
       setText('');
       onBackClick();
 
@@ -71,7 +62,17 @@ export default function NewPostForm({ onBackClick }) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="宣言しよう！"
+            // ★追加: 300文字以上入力できないようにする
+            maxLength={MAX_LENGTH}
           />
+          
+          {/* ★追加: 文字数カウント表示 */}
+          <div className={styles.charCount}>
+            <span style={{ color: text.length >= MAX_LENGTH ? 'red' : 'inherit' }}>
+              {text.length}
+            </span>
+             / {MAX_LENGTH}
+          </div>
           
           <button 
             type="submit" 
