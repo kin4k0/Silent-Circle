@@ -14,9 +14,6 @@ export async function POST(request) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-    // AIへの命令（プロンプト）
-    // ここで「どういう基準でNGにするか」をAIに教えます
     const prompt = `
       あなたはSNSアプリのコンテンツモデレーターです。
       以下の投稿テキストが、他者への攻撃、差別、ハラスメント、過度な暴言を含むかどうか判定してください。
