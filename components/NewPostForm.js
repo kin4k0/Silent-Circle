@@ -1,23 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; //  useEffectを追加
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db, auth } from "../lib/firebase";
+import { onAuthStateChanged } from 'firebase/auth'; // onAuthStateChangedを追加
 import styles from './NewPostForm.module.css';
 
 export default function NewPostForm({ onBackClick }) {
   const [text, setText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAuthReady, setIsAuthReady] = useState(false); //  認証状態の管理を追加
   const MAX_LENGTH = 300;
 
-  // ※手動のNG_WORDSリストはもう使いません
+  // 認証状態の監視と設定
+  // 匿名ログインが完了するのを待機する
+  useEffect(() => {
+    // onAuthStateChangedは、ログイン/ログアウトの状態変化を監視するFirebaseの機能
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      // userがnullでなければ(匿名ログインが成功していれば) trueにする
+      setIsAuthReady(!!user);
+    });
+
+    return () => unsubscribe(); // クリーンアップ（コンポーネントが閉じるときに監視を停止）
+  }, []); // []で初回レンダリング時のみ実行
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!text.trim() || isSubmitting) return;
+    // 認証が完了していない場合は、処理を停止
+    if (!text.trim() || isSubmitting || !isAuthReady) return; 
 
     setIsSubmitting(true); // ボタンを連打できないように早めにロック
 
     try {
-      // 1. AIサーバーに問い合わせる
+      // 1. AIサーバーに問い合わせる (省略不可。安全でない投稿を防ぐため)
       console.log("AIによるチェック中...");
       
       const response = await fetch('/api/moderate', {
@@ -36,15 +49,16 @@ export default function NewPostForm({ onBackClick }) {
       // 2. NG判定ならアラートを出して終了
       if (result.isSafe === false) {
         alert(`投稿できません。\n理由: ${result.reason}`);
-        setIsSubmitting(false); // ロック解除
+        setIsSubmitting(false);
         return;
       }
 
-      // 3. 安全ならFirebaseに保存
+      // 3. 安全ならFirebaseに保存 (この処理は認証済みでないと403エラーになる)
       await addDoc(collection(db, "posts"), {
         text: text,
         claps: 0,
         createdAt: serverTimestamp(),
+        // ログインは完了しているはずなので、uidを取得
         uid: auth.currentUser ? auth.currentUser.uid : null, 
       });
 
@@ -59,6 +73,7 @@ export default function NewPostForm({ onBackClick }) {
     }
   };
 
+  // フォームの描画部分
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -81,16 +96,18 @@ export default function NewPostForm({ onBackClick }) {
             <span style={{ color: text.length >= MAX_LENGTH ? 'red' : 'inherit' }}>
               {text.length}
             </span>
-             / {MAX_LENGTH}
+              / {MAX_LENGTH}
           </div>
           
           <button 
             type="submit" 
             className={styles.submitButton}
-            disabled={!text.trim() || isSubmitting} 
+            //  認証が完了するまでボタンを無効化する条件を追加！
+            disabled={!text.trim() || isSubmitting || !isAuthReady} 
           >
-            {/* AIチェック中は時間がかかるので表示を変える */}
-            {isSubmitting ? 'AIチェック中...' : '宣言する'}
+            {isAuthReady 
+              ? (isSubmitting ? 'AIチェック中...' : '宣言する')
+              : '認証処理中...'} 
           </button>
         </form>
       </main>
