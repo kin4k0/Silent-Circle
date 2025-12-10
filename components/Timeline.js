@@ -29,12 +29,17 @@ export default function Timeline({ onDeclareClick, onOpenSettings }) {
   }, []);
 
   const handleClap = async (id) => {
-    if (likedPostIds.includes(id)) return; 
-    const postRef = doc(db, "posts", id);
-    await updateDoc(postRef, { claps: increment(1) });
-    const newLikedList = [...likedPostIds, id];
-    setLikedPostIds(newLikedList);
-    localStorage.setItem('likedPostIds', JSON.stringify(newLikedList));
+    if (likedPostIds.includes(id)) return;
+    try {
+      const postRef = doc(db, "posts", id);
+      await updateDoc(postRef, { claps: increment(1) });
+      const newLikedList = [...likedPostIds, id];
+      setLikedPostIds(newLikedList);
+      localStorage.setItem('likedPostIds', JSON.stringify(newLikedList));
+    } catch (error) {
+      console.error("リアクションエラー:", error);
+      alert("リアクションに失敗しました。");
+    }
   };
 
   const handleDelete = async (e, id) => {

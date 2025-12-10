@@ -5,8 +5,12 @@ export async function POST(request) {
   try {
     const { text } = await request.json();
 
-    // ★重要: ここに、さっき取得した「AI Studio」のキーを貼り付けてください
-    const apiKey = "AIzaSyA84RIYR5UJAkAGoZvSWuPJm96SwMevrms"; 
+    // 環境変数からAPIキーを取得
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_GENERATIVE_AI_KEY || "AIzaSyA84RIYR5UJAkAGoZvSWuPJm96SwMevrms";
+
+    if (!apiKey) {
+      return NextResponse.json({ error: "APIキーが設定されていません" }, { status: 500 });
+    }
 
     const genAI = new GoogleGenerativeAI(apiKey);
     
@@ -35,9 +39,17 @@ export async function POST(request) {
   } catch (error) {
     // ★エラーの正体をターミナルに詳しく表示する
     console.error("=============== AI ERROR LOG ===============");
-    console.error(error);
+    console.error("エラー:", error);
+    console.error("メッセージ:", error.message);
+    if (error.status) console.error("ステータス:", error.status);
     console.error("============================================");
     
-    return NextResponse.json({ error: "判定失敗" }, { status: 500 });
+    return NextResponse.json(
+      { 
+        error: "判定失敗",
+        details: error.message 
+      }, 
+      { status: 500 }
+    );
   }
 }
