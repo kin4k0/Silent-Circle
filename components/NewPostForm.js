@@ -6,41 +6,29 @@ import styles from './NewPostForm.module.css';
 export default function NewPostForm({ onBackClick }) {
   const [text, setText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 文字数制限
   const MAX_LENGTH = 300;
 
-  // ※手動のNG_WORDSリストはもう使いません
+  // 禁止用語リスト
+  const NG_WORDS = ['死ね', '殺す', '馬鹿', 'ばか', 'バカ', 'あほ', 'うんこ'];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!text.trim() || isSubmitting) return;
+    
+    if (!text.trim()) return;
+    if (isSubmitting) return;
 
-    setIsSubmitting(true); // ボタンを連打できないように早めにロック
+    // 禁止用語チェック
+    const foundNgWord = NG_WORDS.find(word => text.includes(word));
+    if (foundNgWord) {
+      alert(`不適切な言葉が含まれています: 「${foundNgWord}」`);
+      return; 
+    }
 
     try {
-      // 1. AIサーバーに問い合わせる
-      console.log("AIによるチェック中...");
-      
-      const response = await fetch('/api/moderate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: text }),
-      });
+      setIsSubmitting(true);
 
-      if (!response.ok) {
-        throw new Error("AIチェックサーバーのエラー");
-      }
-
-      const result = await response.json();
-      console.log("AI判定結果:", result);
-
-      // 2. NG判定ならアラートを出して終了
-      if (result.isSafe === false) {
-        alert(`投稿できません。\n理由: ${result.reason}`);
-        setIsSubmitting(false); // ロック解除
-        return;
-      }
-
-      // 3. 安全ならFirebaseに保存
       await addDoc(collection(db, "posts"), {
         text: text,
         claps: 0,
@@ -73,10 +61,12 @@ export default function NewPostForm({ onBackClick }) {
             className={styles.textarea}
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="宣言しよう！（300文字以内）"
+            placeholder="宣言しよう！"
+            // ★追加: 300文字以上入力できないようにする
             maxLength={MAX_LENGTH}
           />
           
+          {/* ★追加: 文字数カウント表示 */}
           <div className={styles.charCount}>
             <span style={{ color: text.length >= MAX_LENGTH ? 'red' : 'inherit' }}>
               {text.length}
@@ -89,8 +79,7 @@ export default function NewPostForm({ onBackClick }) {
             className={styles.submitButton}
             disabled={!text.trim() || isSubmitting} 
           >
-            {/* AIチェック中は時間がかかるので表示を変える */}
-            {isSubmitting ? 'AIチェック中...' : '宣言する'}
+            {isSubmitting ? '送信中...' : '宣言する'}
           </button>
         </form>
       </main>
