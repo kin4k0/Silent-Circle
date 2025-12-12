@@ -28,12 +28,7 @@ export default function NewPostForm({ onBackClick }) {
     // 認証が完了していない場合は、処理を停止
     if (!text.trim() || isSubmitting || !isAuthReady) return;
 
-    // 禁止用語チェック
-    const foundNgWord = NG_WORDS.find(word => text.includes(word));
-    if (foundNgWord) {
-      alert(`不適切な言葉が含まれています: 「${foundNgWord}」`);
-      return; 
-    }
+
 
     try {
       // 1. AIサーバーに問い合わせる (省略不可。安全でない投稿を防ぐため)
@@ -63,7 +58,8 @@ export default function NewPostForm({ onBackClick }) {
 
       // 2. NG判定ならアラートを出して終了
       if (result.isSafe === false) {
-        alert(`投稿できません。\n理由: ${result.reason}`);
+        const details = result.matchedWords && result.matchedWords.length > 0 ? `\n検出された語: ${result.matchedWords.join('、')}` : '';
+        alert(`投稿できません。\n理由: ${result.reason || '不明な理由'}${details}`);
         setIsSubmitting(false);
         return;
       }
