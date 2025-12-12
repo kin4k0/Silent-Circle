@@ -5,10 +5,15 @@ export async function POST(request) {
   try {
     const { text } = await request.json();
 
-    // 環境変数からAPIキーを取得
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_GENERATIVE_AI_KEY || "AIzaSyA84RIYR5UJAkAGoZvSWuPJm96SwMevrms";
+    // サーバー専用の環境変数を優先して取得
+    const apiKey = process.env.GOOGLE_GENERATIVE_AI_KEY || process.env.NEXT_PUBLIC_GOOGLE_GENERATIVE_AI_KEY || null;
 
-    if (!apiKey) {
+    // ログにフルキーを出さないようにマスクして表示（開発時の確認用）
+    if (apiKey) {
+      const masked = `${apiKey.slice(0, 4)}...${apiKey.slice(-4)}`;
+      console.log("Loaded Google Generative AI key:", masked);
+    } else {
+      console.error("Google Generative AI API key is missing. Set GOOGLE_GENERATIVE_AI_KEY in .env.local and restart the server.");
       return NextResponse.json({ error: "APIキーが設定されていません" }, { status: 500 });
     }
 
@@ -16,6 +21,12 @@ export async function POST(request) {
     
     // モデル名は "gemini-1.5-flash" を使います
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+    // 追加のデバッグログ: 環境変数がプロセスで読み込まれているか
+    console.log('Debug env check:', {
+      GOOGLE_GENERATIVE_AI_KEY_present: !!process.env.GOOGLE_GENERATIVE_AI_KEY,
+      NEXT_PUBLIC_GOOGLE_GENERATIVE_AI_KEY_present: !!process.env.NEXT_PUBLIC_GOOGLE_GENERATIVE_AI_KEY,
+    });
 
     const prompt = `
       あなたはコンテンツモデレーターです。
@@ -26,15 +37,29 @@ export async function POST(request) {
       { "isSafe": boolean, "reason": "string" }
     `;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const textResponse = response.text();
+    try {
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const textResponse = response.text();
 
-    // JSONの整形
-    const jsonString = textResponse.replace(/```json|```/g, "").trim();
-    const jsonResponse = JSON.parse(jsonString);
+      // JSONの整形
+      const jsonString = textResponse.replace(/```json|```/g, "").trim();
+      const jsonResponse = JSON.parse(jsonString);
 
-    return NextResponse.json(jsonResponse);
+      return NextResponse.json(jsonResponse);
+    } catch (ex) {
+      console.error('Model generateContent error:', ex);
+      // 可能ならレスポンスボディなど詳細もログ出す
+      if (ex?.response) {
+        try {
+          const body = await ex.response.text();
+          console.error('Model response body:', body);
+        } catch (e) {
+          console.error('Failed to read model response body:', e);
+        }
+      }
+      throw ex;
+    }
 
   } catch (error) {
     // ★エラーの正体をターミナルに詳しく表示する

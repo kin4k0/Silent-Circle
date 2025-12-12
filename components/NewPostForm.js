@@ -10,8 +10,6 @@ export default function NewPostForm({ onBackClick }) {
   const [isAuthReady, setIsAuthReady] = useState(false); //  認証状態の管理を追加
   const MAX_LENGTH = 300;
 
-  // 禁止用語リスト
-  const NG_WORDS = ['死ね', '殺す', '馬鹿', 'ばか', 'バカ', 'あほ', 'うんこ'];
 
   // 認証状態の監視と設定
   // 匿名ログインが完了するのを待機する
@@ -48,8 +46,16 @@ export default function NewPostForm({ onBackClick }) {
         body: JSON.stringify({ text: text }),
       });
 
+      // サーバーからのエラー詳細を読み取る
       if (!response.ok) {
-        throw new Error("AIチェックサーバーのエラー");
+        let errBody = null;
+        try {
+          errBody = await response.json();
+        } catch (e) {
+          console.error('レスポンスのJSONパースに失敗:', e);
+        }
+        console.error('AIチェックサーバー エラー:', response.status, errBody);
+        throw new Error(errBody?.details || errBody?.error || `AIチェックサーバーエラー(${response.status})`);
       }
 
       const result = await response.json();
