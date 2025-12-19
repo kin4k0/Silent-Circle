@@ -26,7 +26,7 @@ export async function POST(request) {
     });
 
     // 優先モデルリスト（環境変数で上書き可能）
-    let candidateModels = (process.env.GENERATIVE_MODEL_CANDIDATES || 'gemini-1.5,gemini-1.5-pro,gpt-4o-mini,gpt-4o,gpt-3.5-mini').split(',');
+    let candidateModels = ['gemini-1.5-flash'];
 
     // 試行前に利用可能モデルを問い合わせ（可能なら client API → REST フォールバック）して、動的候補を先頭に追加
     try {
