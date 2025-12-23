@@ -27,19 +27,18 @@ export async function POST(request) {
 
     // AIへの命令文（プロンプト）を改良
     const prompt = `
-      あなたは非常に寛容なSNSモデレーターです。投稿内容が「明らかな個人への攻撃・暴言・差別」にあたるか判定してください。
+  あなたはSNSの単純なフィルターです。
 
-      【判定ルール】
-      - 挨拶（こんにちわ等）、意気込み（がんばる等）、日常報告（就活、終活等）はすべて「isSafe: true」です。
-      - ゲーム用語、比喩表現、独り言もすべて「isSafe: true」です。
-      - 迷った場合は必ず「isSafe: true」と答えてください。
-      - 明確な悪意がある攻撃のみ「isSafe: false」にします。
+  【ルール】
+  1. 投稿内容に「死ね」「殺す」「バカ」「デブ」などの、具体的な個人への直接的な「罵詈雑言」が含まれている場合のみ { "isSafe": false } としてください。
+  2. それ以外の「挨拶」「がんばる」「就活」「悩み」「ゲームの感想」などは、たとえ死や暴力に関する言葉が混ざっていても、すべて「isSafe: true」としてください。
+  3. 判定に迷う場合は、100%「isSafe: true」にしてください。深読みは厳禁です。
 
-      投稿: "${text}"
+  投稿内容: "${text}"
 
-      必ず以下のJSON形式でのみ回答してください。余計な文章は一切不要です。
-      { "isSafe": boolean, "reason": "理由", "matchedWords": [] }
-    `;
+  回答は以下のJSON形式のみで返してください：
+  { "isSafe": boolean, "reason": "理由", "matchedWords": [] }
+`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
