@@ -28,8 +28,6 @@ export default function NewPostForm({ onBackClick }) {
     // 認証が完了していない場合は、処理を停止
     if (!text.trim() || isSubmitting || !isAuthReady) return;
 
-
-
     try {
       // 1. AIサーバーに問い合わせる (省略不可。安全でない投稿を防ぐため)
       console.log("AIによるチェック中...");
